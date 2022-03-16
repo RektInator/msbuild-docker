@@ -13,7 +13,7 @@ jobs:
       - name: Install vs2022 buildtools
         run: |
           Invoke-WebRequest -Uri https://aka.ms/vs/17/release/vs_BuildTools.exe -OutFile vs_BuildTools.exe
-          cmd /S /C "start /w vs_BuildTools.exe --nocache --noUpdateInstaller --installPath '%cd%\vs_buildtools' --addProductLang en-US --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --wait --quiet"
+          cmd /S /C "start /w vs_BuildTools.exe --nocache --noUpdateInstaller --installPath %cd%\vs_buildtools --addProductLang en-US --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --wait --quiet"
           ls
 
       - name: Docker Setup Buildx
