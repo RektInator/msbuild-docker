@@ -26,11 +26,14 @@ jobs:
           path: vs_buildtools.7z
             
   build_container:
-    needs: install_buildtools
+    #needs: install_buildtools
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
+        
+      - name: test
+        run: docker build -t ghcr.io/rektinator/msbuild-docker:${{ github.ref_name }} -t ghcr.io/rektinator/msbuild-docker:latest .
     
       - name: Download buildtools artifact
         uses: actions/download-artifact@v3.0.0
