@@ -20,6 +20,7 @@ jobs:
           path: vs_buildtools
             
   build_container:
+    needs: install_buildtools
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
