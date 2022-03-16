@@ -44,14 +44,10 @@ jobs:
           pathSource: vs_buildtools.7z
           pathTarget: vs_buildtools
     
-      - name: test
-        run: |
-          pwd
-          ls -al
-    
       - name: Docker Setup Buildx
         uses: docker/setup-buildx-action@v1.6.0
         with:
+          driver: docker
           install: true
 
       - name: Login to GitHub Container Registry
@@ -65,6 +61,7 @@ jobs:
         uses: docker/build-push-action@v2.10.0
         with:
           no-cache: true
+          push: true
           tags: |
             ghcr.io/rektinator/msbuild-docker:${{ github.ref_name }}
             ghcr.io/rektinator/msbuild-docker:latest
