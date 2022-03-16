@@ -13,17 +13,11 @@ jobs:
           Invoke-WebRequest -Uri https://aka.ms/vs/17/release/vs_BuildTools.exe -OutFile vs_BuildTools.exe
           cmd /S /C "start /w vs_BuildTools.exe --nocache --noUpdateInstaller --installPath %cd%\vs_buildtools --addProductLang en-US --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --wait --quiet"
 
-      - name: Compress buildtools
-        uses: DuckSoft/create-7z-action@v1.0
-        with:
-          pathSource: vs_buildtools
-          pathTarget: vs_buildtools.7z
-
       - name: Publish buildtools artifact
         uses: actions/upload-artifact@v3.0.0
         with:
           name: BuildTools
-          path: vs_buildtools.7z
+          path: vs_buildtools
             
   build_container:
     needs: install_buildtools
@@ -36,14 +30,8 @@ jobs:
         uses: actions/download-artifact@v3.0.0
         with:
           name: BuildTools
-          path: vs_buildtools.7z
+          path: vs_buildtools
           
-      - name: Extract buildtools
-        uses: DuckSoft/extract-7z-action@v1.0
-        with:
-          pathSource: vs_buildtools.7z
-          pathTarget: vs_buildtools
-    
       - name: Docker Setup Buildx
         uses: docker/setup-buildx-action@v1.6.0
         with:
