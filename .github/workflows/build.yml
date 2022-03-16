@@ -26,15 +26,12 @@ jobs:
           path: vs_buildtools.7z
             
   build_container:
-    #needs: install_buildtools
+    needs: install_buildtools
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
         
-      - name: test
-        run: docker build -t ghcr.io/rektinator/msbuild-docker:${{ github.ref_name }} -t ghcr.io/rektinator/msbuild-docker:latest .
-    
       - name: Download buildtools artifact
         uses: actions/download-artifact@v3.0.0
         with:
@@ -46,26 +43,16 @@ jobs:
         with:
           pathSource: vs_buildtools.7z
           pathTarget: vs_buildtools
-    
-      - name: Docker Setup Buildx
-        uses: docker/setup-buildx-action@v1.6.0
-        with:
-          driver: docker
-          install: true
-
+        
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
+        
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2.10.0
-        with:
-          no-cache: true
-          push: true
-          tags: |
-            ghcr.io/rektinator/msbuild-docker:${{ github.ref_name }}
-            ghcr.io/rektinator/msbuild-docker:latest
-    
+        run: |
+          docker build -t ghcr.io/rektinator/msbuild-docker:${{ github.ref_name }} -t ghcr.io/rektinator/msbuild-docker:latest .
+          docker push ghcr.io/rektinator/msbuild-docker:${{ github.ref_name }}
+          docker push ghcr.io/rektinator/msbuild-docker:latest
