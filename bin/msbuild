@@ -1,0 +1,2 @@
+#!/bin/bash
+vs_cmd "msbuild $*"
