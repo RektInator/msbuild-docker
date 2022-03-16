@@ -8,13 +8,12 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Install vs2022 buildtools
         run: |
           Invoke-WebRequest -Uri https://aka.ms/vs/17/release/vs_BuildTools.exe -OutFile vs_BuildTools.exe
-          ./vs_BuildTools.exe --wait --nocache --noUpdateInstaller --installPath "./vs_buildtools" --addProductLang en-US --add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended --quiet --norestart
+          cmd /S /C "start /w vs_BuildTools.exe --nocache --noUpdateInstaller --installPath '%cd%\vs_buildtools' --addProductLang en-US --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --wait --quiet"
           ls
 
       - name: Docker Setup Buildx
