@@ -1,0 +1,23 @@
+name: CI
+on:
+  push:
+    branches: [ refs/tags/* ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Install vs2022 build tools
+        run: |
+          Invoke-WebRequest -Uri https://aka.ms/vs/17/release/vs_BuildTools.exe -OutFile vs_BuildTools.exe
+          ./vs_BuildTools.exe --nocache --noUpdateInstaller --installPath "./vs_buildtools" --addProductLang en-US --add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended --quiet --norestart
+          ls
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2.10.0
+        with:
+          push: true
+          tags: rektinator/msbuild:latest,rektinator/msbuild:$GITHUB_REF_NAME
