@@ -1,13 +1,15 @@
 # build arguments
 ARG UBUNTU_VERSION="latest"
+ARG USER_ID
+ARG GROUP_ID
 ARG SOLUTION_DIR
 
 FROM ubuntu:${UBUNTU_VERSION}
 
 # environment variables
 ENV DEBIAN_FRONTEND="noninteractive"
-# copy installation scripts
-COPY build .
+ENV USER_ID=${USER_ID:-1000}
+ENV GROUP_ID=${GROUP_ID:-1000}
 ENV SOLUTION_DIR=${SOLUTION_DIR:-/src}
 
 # copy scripts
@@ -15,7 +17,6 @@ COPY bin /usr/bin
 
 # copy buildtools into container
 COPY vs_buildtools /opt/vs_buildtools
-RUN ls -al /opt/vs_buildtools
 
 # fix winsdk script
 # this if-statement condition ALWAYS fails under wine, seems to be a wine bug?
@@ -35,16 +36,20 @@ RUN apt-get update && \
     apt-get clean && \
 	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# set script permissions
-RUN chmod +x install_sdks.sh
+# create a new user called runner (running things as root is not necessary at this point anymore), create the src folder and give the user full permission to that folder
+RUN groupadd --gid ${GROUP_ID} runner && \
+    useradd --create-home --uid ${USER_ID} --gid ${GROUP_ID} runner && \
+    mkdir /src && \
+    chown -R ${USER_ID}:${GROUP_ID} /src
 
-# install required packages
-RUN apt update
-RUN apt install wget software-properties-common xvfb -y
+USER runner
+WORKDIR /src
 
-# install dotnet
-RUN xvfb-run ./install_sdks.sh
-RUN rm install_sdks.sh
+# copy installation script
+COPY --chown=${USER_ID}:${GROUP_ID} build/install_sdks.sh /tmp/
+
+RUN xvfb-run /tmp/install_sdks.sh && \
+    rm -r ${HOME}/.cache/* /tmp/*
 
 # set vs_cmd as entrypoint
 ENTRYPOINT ["vs_cmd"]
