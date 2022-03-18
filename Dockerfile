@@ -1,11 +1,14 @@
-FROM ubuntu:latest
+# build arguments
+ARG UBUNTU_VERSION="latest"
+ARG SOLUTION_DIR
+
+FROM ubuntu:${UBUNTU_VERSION}
 
 # environment variables
-ARG SOLUTION_DIR="/src"
-ENV SOLUTION_DIR=${SOLUTION_DIR}
-
+ENV DEBIAN_FRONTEND="noninteractive"
 # copy installation scripts
 COPY build .
+ENV SOLUTION_DIR=${SOLUTION_DIR:-/src}
 
 # copy scripts
 COPY bin /usr/bin
