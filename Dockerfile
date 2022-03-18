@@ -51,6 +51,8 @@ COPY --chown=${USER_ID}:${GROUP_ID} build/install_sdks.sh /tmp/
 RUN xvfb-run /tmp/install_sdks.sh && \
     rm -r ${HOME}/.cache/* /tmp/*
 
+VOLUME ["/src"]
+
 # set vs_cmd as entrypoint
 ENTRYPOINT ["vs_cmd"]
 
