@@ -12,7 +12,7 @@ jobs:
       - name: Check for new VS versions
         run: |
             function get-latest-vs-release {
-                curl -s --location https://aka.ms/vs/17/release/channel | jq -r -e '.info.productDisplayVersion'
+                curl -s --location https://aka.ms/vs/$1/release/channel | jq -r -e '.info.productDisplayVersion'
             }
             function check-vs-release {
                 LATEST_RELEASE=$(get-latest-vs-release $1)
