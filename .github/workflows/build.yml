@@ -1,17 +1,34 @@
 name: Build Container
 on:
-  push:
-    tags:
-      - '*'
+#  push:
+#    tags:
+#      - '*'
   workflow_dispatch:
+    inputs:
+      vs_version:
+        type: string
+        required: true
+        default: '17'
 jobs:
   install_buildtools:
     runs-on: windows-latest
     steps:
       - name: Install buildtools
         run: |
+          # download buildtools installer
           Invoke-WebRequest -Uri https://aka.ms/vs/17/release/vs_BuildTools.exe -OutFile vs_BuildTools.exe
-          cmd /S /C "start /w vs_BuildTools.exe --nocache --noUpdateInstaller --installPath %cd%\vs_buildtools --addProductLang en-US --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --wait --quiet"
+          
+          # set VS_VERSION env variable
+          $env:VS_VERSION = ${{ github.event.inputs.vs_version }}
+          
+          # download release metadata
+          Invoke-WebRequest -Uri https://aka.ms/vs/$env:VS_VERSION/release/channel -OutFile channel.json
+          
+          # run buildtools installer
+          cmd /S /C "start /w vs_BuildTools.exe --channelURI https://aka.ms/vs/%VS_VERSION%/release/channel --nocache --noUpdateInstaller --installPath %cd%\vs_buildtools --addProductLang en-US --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --wait --quiet"
+
+          # store vs version number
+          $(Get-Content channel.json | ConvertFrom-Json).info.productDisplayVersion | Out-File vs_buildtools/version.txt -Encoding ascii -NoNewline
 
       - name: Compress buildtools
         uses: DuckSoft/create-7z-action@v1.0
@@ -53,6 +70,13 @@ jobs:
         
       - name: Build and push Docker image
         run: |
-          docker build -t ghcr.io/rektinator/msbuild-docker:${{ github.ref_name }} -t ghcr.io/rektinator/msbuild-docker:latest .
-          docker push ghcr.io/rektinator/msbuild-docker:${{ github.ref_name }}
-          docker push ghcr.io/rektinator/msbuild-docker:latest
+          VS_VERSION=${{ github.event.inputs.vs_version }}
+          VS_FULL_VERSION=$(cat vs_buildtools/version.txt)
+          docker build -t ghcr.io/rektinator/msbuild-docker:${{ github.event.inputs.vs_version }}-latest -t ghcr.io/rektinator/msbuild-docker:$VS_VERSION .
+          docker push ghcr.io/rektinator/msbuild-docker:${{ github.event.inputs.vs_version }}-latest
+          docker push ghcr.io/rektinator/msbuild-docker:$VS_FULL_VERSION
+          if [ $VS_VERSION -eq 17 ]
+          then
+            docker tag ghcr.io/rektinator/msbuild-docker:$VS_FULL_VERSION ghcr.io/rektinator/msbuild-docker:latest
+            docker push ghcr.io/rektinator/msbuild-docker:latest
+          fi
