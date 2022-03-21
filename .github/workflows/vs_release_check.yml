@@ -1,0 +1,28 @@
+name: Check for VS releases
+
+on:
+  schedule:
+    - cron:  '0 0 * * *'
+  workflow_dispatch:
+  
+jobs:
+  check_vs_versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for new VS versions
+        run: |
+            function get-latest-vs-release {
+                curl -s --location https://aka.ms/vs/17/release/channel | jq -r -e '.info.productDisplayVersion'
+            }
+            function check-vs-release {
+                LATEST_RELEASE=$(get-latest-vs-release $1)
+                docker manifest inspect ghcr.io/rektinator/msbuild-docker:$LATEST_RELEASE
+                #if [ $? -eq 1 ]
+                #then
+                # new release detected, trigger build action
+                curl -X POST -u rektinator:${{ secrets.GITHUB_TOKEN }} https://api.github.com/repos/rektinator/msbuild-docker/actions/workflows/build.yml/dispatches -d "{\"ref\":\"main\", \"inputs\": {\"vs_version\": \"$1\"}}"
+                # fi
+            }
+
+            check-vs-release 16
+            check-vs-release 17
