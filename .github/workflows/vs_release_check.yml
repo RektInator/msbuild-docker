@@ -20,7 +20,7 @@ jobs:
                 #if [ $? -eq 1 ]
                 #then
                 # new release detected, trigger build action
-                curl -X POST -H "Accept: application/vnd.github.v3+json" -u rektinator:${{ secrets.GITHUB_TOKEN }} https://api.github.com/repos/rektinator/msbuild-docker/actions/workflows/build.yml/dispatches -d "{\"ref\":\"main\", \"inputs\": {\"vs_version\": \"$1\"}}"
+                curl -X POST -H "Accept: application/vnd.github.v3+json" -u rektinator:${{ secrets.WORKFLOW_TOKEN }} https://api.github.com/repos/rektinator/msbuild-docker/actions/workflows/build.yml/dispatches -d "{\"ref\":\"main\", \"inputs\": {\"vs_version\": \"$1\"}}"
                 # fi
             }
 
