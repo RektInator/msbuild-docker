@@ -15,13 +15,6 @@ ENV SOLUTION_DIR=${SOLUTION_DIR:-/src}
 # copy scripts
 COPY bin /usr/bin
 
-# copy buildtools into container
-COPY vs_buildtools /opt/vs_buildtools
-
-# fix winsdk script
-# this if-statement condition ALWAYS fails under wine, seems to be a wine bug?
-RUN sed -i 's/\"!result:~0,3!\"==\"10.\"/\"1\"==\"1\"/g' /opt/vs_buildtools/Common7/Tools/vsdevcmd/core/winsdk.bat
-
 # install available updates, add the wine repository and install the required packages
 RUN apt-get update && \
     apt-get full-upgrade --yes && \
@@ -40,22 +33,27 @@ RUN apt-get update && \
 RUN groupadd --gid ${GROUP_ID} runner && \
     useradd --create-home --uid ${USER_ID} --gid ${GROUP_ID} runner && \
     mkdir /src && \
-    chown -R ${USER_ID}:${GROUP_ID} /src && \
-    chown -R ${USER_ID}:${GROUP_ID} /opt/vs_buildtools
-    
+    chown -R ${USER_ID}:${GROUP_ID} /src
 USER runner
-WORKDIR /src
 
-# copy installation script
+# install Windows SDK
 COPY --chown=${USER_ID}:${GROUP_ID} build/install_sdks.sh /tmp/
-
 RUN xvfb-run /tmp/install_sdks.sh && \
     rm -r ${HOME}/.cache/* /tmp/*
 
+# copy buildtools into container
+COPY --chown=${USER_ID}:${GROUP_ID} vs_buildtools ${HOME}/vs_buildtools
+
+# fix winsdk script
+# this if-statement condition ALWAYS fails under wine, seems to be a wine bug?
+RUN sed -i 's/\"!result:~0,3!\"==\"10.\"/\"1\"==\"1\"/g' ${HOME}/vs_buildtools/Common7/Tools/vsdevcmd/core/winsdk.bat
+
+# set working directory to /src (or Z:\src in wine terms)
+WORKDIR /src
 VOLUME ["/src"]
 
 # set vs_cmd as entrypoint
 ENTRYPOINT ["vs_cmd"]
 
-# spawn cmd by default
+# pass "cmd" as argument to vs_cmd by default, this will open a command prompt
 CMD ["cmd"]
