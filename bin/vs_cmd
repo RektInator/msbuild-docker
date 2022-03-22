@@ -10,5 +10,5 @@ fi
 
 # spawn vs dev shell & execute commands
 pushd "${SOLUTION_DIR}" > /dev/null
-WINEDEBUG=-all wine cmd /c "/opt/vs_buildtools/Common7/Tools/VsDevCmd.bat && cd /d %SOLUTION_DIR% && $*"
+WINEDEBUG=-all wine cmd /c "/opt/msbuild/vs_buildtools/Common7/Tools/VsDevCmd.bat && cd /d %SOLUTION_DIR% && $*"
 popd > /dev/null

@@ -15,7 +15,7 @@ wineserver --kill
 wget -q https://download.microsoft.com/download/d/8/f/d8ff148b-450c-40b3-aeed-2a3944e66bbd/windowssdk/winsdksetup.exe -O ${HOME}/.cache/winsdksetup.exe
 
 # install the windows SDK
-wine64 ${HOME}/.cache/winsdksetup.exe /norestart /q /installpath "Z:\\home\\runner\\winsdk"
+wine64 ${HOME}/.cache/winsdksetup.exe /norestart /q /installpath "Z:\\opt\\msbuild\\winsdk"
 
 # kill wineserver
 wineserver --kill

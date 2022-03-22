@@ -33,7 +33,9 @@ RUN apt-get update && \
 RUN groupadd --gid ${GROUP_ID} runner && \
     useradd --create-home --uid ${USER_ID} --gid ${GROUP_ID} runner && \
     mkdir /src && \
-    chown -R ${USER_ID}:${GROUP_ID} /src
+    chown -R ${USER_ID}:${GROUP_ID} /src && \
+    mkdir /opt/msbuild && \
+    chown -R ${USER_ID}:${GROUP_ID} /opt/msbuild
 USER runner
 
 # install Windows SDK
@@ -42,11 +44,11 @@ RUN xvfb-run /tmp/install_sdks.sh && \
     rm -r ${HOME}/.cache/* /tmp/*
 
 # copy buildtools into container
-COPY --chown=${USER_ID}:${GROUP_ID} vs_buildtools ${HOME}/vs_buildtools
+COPY --chown=${USER_ID}:${GROUP_ID} vs_buildtools /opt/msbuild/vs_buildtools
 
 # fix winsdk script
 # this if-statement condition ALWAYS fails under wine, seems to be a wine bug?
-RUN sed -i 's/\"!result:~0,3!\"==\"10.\"/\"1\"==\"1\"/g' ${HOME}/vs_buildtools/Common7/Tools/vsdevcmd/core/winsdk.bat
+RUN sed -i 's/\"!result:~0,3!\"==\"10.\"/\"1\"==\"1\"/g' /opt/msbuild/vs_buildtools/Common7/Tools/vsdevcmd/core/winsdk.bat
 
 # set working directory to /src (or Z:\src in wine terms)
 WORKDIR /src
