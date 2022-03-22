@@ -40,8 +40,9 @@ RUN apt-get update && \
 RUN groupadd --gid ${GROUP_ID} runner && \
     useradd --create-home --uid ${USER_ID} --gid ${GROUP_ID} runner && \
     mkdir /src && \
-    chown -R ${USER_ID}:${GROUP_ID} /src
-
+    chown -R ${USER_ID}:${GROUP_ID} /src && \
+    chown -R ${USER_ID}:${GROUP_ID} /opt/vs_buildtools
+    
 USER runner
 WORKDIR /src
 
