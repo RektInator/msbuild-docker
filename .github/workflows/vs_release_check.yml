@@ -12,16 +12,16 @@ jobs:
       - name: Check for new VS versions
         run: |
             function get-latest-vs-release {
-                curl -s --location https://aka.ms/vs/$1/release/channel | jq -r -e '.info.productDisplayVersion'
+                curl -s --location "https://aka.ms/vs/$1/release/channel" | jq -r -e '.info.productDisplayVersion'
             }
             function check-vs-release {
                 LATEST_RELEASE=$(get-latest-vs-release $1)
                 docker manifest inspect ghcr.io/rektinator/msbuild-docker:$LATEST_RELEASE > /dev/null
-                if [ $? -eq 1 ]
+                if [ $? -ne 0 ];
                 then
                     # new release detected, trigger build action
                     echo "Detected new VS version $LATEST_RELEASE, triggering build!"
-                    curl -s -X POST -H "Accept: application/vnd.github.v3+json" -u rektinator:${{ secrets.WORKFLOW_TOKEN }} https://api.github.com/repos/rektinator/msbuild-docker/actions/workflows/build.yml/dispatches -d "{\"ref\":\"main\", \"inputs\": {\"vs_version\": \"$1\"}}"
+                    curl -s -X POST -H "Accept: application/vnd.github.v3+json" -u rektinator:${{ secrets.WORKFLOW_TOKEN }} https://api.github.com/repos/rektinator/msbuild-docker/actions/workflows/build.yml/dispatches -d "{\"ref\":\"main\", \"inputs\": {\"vs_version\": \"$1\"}}" > /dev/null
                 fi
             }
 
