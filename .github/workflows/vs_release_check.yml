@@ -11,6 +11,11 @@ jobs:
     steps:
       - name: Check for new VS versions
         run: |
+            #!/usr/bin/env bash
+            
+            # don't exit script on error
+            set +e
+            
             function get-latest-vs-release {
                 curl -s --location "https://aka.ms/vs/$1/release/channel" | jq -r -e '.info.productDisplayVersion'
             }
